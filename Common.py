@@ -173,3 +173,13 @@ def getPositions(obj):
                         obj.relationships.append("overlaps")
                 except KeyError:
                     pass
+
+def compareTransformations(frame,compareWith,scores):
+        possible = ["1", "2", "3", "4", "5", "6"]
+        for name in possible:
+            
+            transforms = frame.transformations[name]
+            for compareWithVal,transformsval in zip(compareWith.values(),transforms.values()):
+                scores[name] += len(set(compareWithVal).intersection(transformsval))
+
+        return scores

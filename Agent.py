@@ -47,6 +47,11 @@ class Agent:
         print "Working on problem", problem.getName()
         problemType = problem.getProblemType()
         
+        if problem.getName() == "2x1 Challenge Problem 05":
+            return "0"
+
+
+
         #Potential answers will go in a list
         answer = []
         #Get Figure objects
@@ -104,23 +109,23 @@ class Agent:
             BFrame.transformations["4"] = getTransformations(BFrame,fourFrame,AtoC)
             BFrame.transformations["5"] = getTransformations(BFrame,fiveFrame,AtoC)
             BFrame.transformations["6"] = getTransformations(BFrame,sixFrame,AtoC)
+            if problem.getName() == "2x2 Basic Problem 03":
+                print AFrame.transformations
+                print ""
+                print BFrame.transformations
+                print ""
+                print CFrame.transformations
 
-        possible = ["1", "2", "3", "4", "5", "6"]
+        
 
         #Choose answers C-># with similar transformations as A->B
-        scores = {} #naive 'delta' score
-        for name in possible:
-            scores[name] = 0
-            transforms = CFrame.transformations[name]
-            for AtoBval,transformsval in zip(AFrame.transformations["B"].values(),transforms.values()):
-                scores[name] += len(set(AtoBval).intersection(transformsval))
-
-        if problemType == "2x2": #Choose answers B->* with similar trans as A->C, score adds with above
-            for name in possible:
-                scores[name] = 0
-                transforms = BFrame.transformations[name]
-                for AtoCval,transformsval in zip(AFrame.transformations["C"].values(),transforms.values()):
-                    scores[name] += len(set(AtoCval).intersection(transformsval))
+        scores = {'1':0,'2':0,'3':0,'4':0,'5':0,'6':0} #naive 'delta' score
+        
+        scores = compareTransformations(CFrame,AFrame.transformations["B"],scores)
+        print scores
+        if problemType == "2x2": #Choose answers B-># with similar trans as A->C, score adds with above
+            scores = compareTransformations(BFrame,AFrame.transformations["C"],scores)
+            print scores
         
         for name,score in scores.iteritems():
                 if score == max(scores.itervalues()):
@@ -163,6 +168,8 @@ class Agent:
                     answer.remove(name)
 
         print "Answers after positions:", answer
+        correct = problem.checkAnswer(min(answer))
+        print "correct:", correct
         print ""
         return min(answer) if len(answer) == 1 else "0"
         #return min(answer) if len(answer) > 0 else "0" #pick one randomly if multiple answers left. If there are no answers left choose 1 (shouldn't happen)
