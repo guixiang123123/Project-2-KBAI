@@ -109,14 +109,14 @@ class Agent:
             BFrame.transformations["4"] = getTransformations(BFrame,fourFrame,AtoC)
             BFrame.transformations["5"] = getTransformations(BFrame,fiveFrame,AtoC)
             BFrame.transformations["6"] = getTransformations(BFrame,sixFrame,AtoC)
-            if problem.getName() == "2x2 Basic Problem 03":
-                print AFrame.transformations
-                print ""
-                print BFrame.transformations
-                print ""
-                print CFrame.transformations
-
         
+        if problem.getName() == "2x2 Basic Problem 07":
+            print AFrame.transformations
+            print ""
+            # print BFrame.transformations
+            # print ""
+            print CFrame.transformations
+    
 
         #Choose answers C-># with similar transformations as A->B
         scores = {'1':0,'2':0,'3':0,'4':0,'5':0,'6':0} #naive 'delta' score
@@ -132,11 +132,39 @@ class Agent:
                     answer.append(name)
 
         print "Answers after transformations:", answer
+
+        
+
+        #if there is more than one answer for 2x2, compare both transforms with possible solutions
+        #keep scoring from above and add to it
+        if len(answer) > 1 and problemType == "2x2":
+            #get relationships between horizontal and vertical transformations
+            A_2x2Transforms = get2x2TransformRelations(AFrame.transformations["B"],AFrame.transformations["C"])
+            One_2x2Transforms = get2x2TransformRelations(CFrame.transformations["1"],BFrame.transformations["1"])
+            Two_2x2Transforms = get2x2TransformRelations(CFrame.transformations["2"],BFrame.transformations["2"])
+            Three_2x2Transforms = get2x2TransformRelations(CFrame.transformations["3"],BFrame.transformations["3"])
+            Four_2x2Transforms = get2x2TransformRelations(CFrame.transformations["4"],BFrame.transformations["4"])
+            Five_2x2Transforms = get2x2TransformRelations(CFrame.transformations["5"],BFrame.transformations["5"])
+            Six_2x2Transforms = get2x2TransformRelations(CFrame.transformations["6"],BFrame.transformations["6"])
+            Soln_transforms = [One_2x2Transforms,Two_2x2Transforms,Three_2x2Transforms,Four_2x2Transforms,Five_2x2Transforms,Six_2x2Transforms]
+
+            #Score relationships
+            scores = compare2x2Transformations(Soln_transforms,A_2x2Transforms,scores)
+            for name,score in scores.iteritems():
+                if score == max(scores.itervalues()):
+                    if name not in answer:
+                        answer.append(name)
+                else: #remove low scoring answers
+                    if name in answer:
+                        answer.remove(name)
+
+            print scores
+            print "Answers after 2x2 transformations:", answer
+
+
         #if there is more than one possible answer, compare relative positions of objects in B with solutions
 
         #generate positional relationships for each object
-        
-
         if len(answer) > 1:
             for frame in frameList:
                 for obj in frame.nodes:
@@ -167,7 +195,7 @@ class Agent:
                 if score < max(scores.itervalues()):
                     answer.remove(name)
 
-        print "Answers after positions:", answer
+            print "Answers after positions:", answer
         correct = problem.checkAnswer(min(answer))
         print "correct:", correct
         print ""

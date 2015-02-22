@@ -99,24 +99,26 @@ def getTransformations(AFrame,BFrame,matchWith):
                         B_atts["angle"] = 0
                      
                     if A_atts["shape"] == "circle" and B_atts["shape"] == "circle": #ignore angle changes for circle
-                        if matchWith:
-                            for obj in matchWith.iterkeys():
-                                if 'angleDiff' in matchWith[obj]:
-                                    transforms[B_name].append('angleDiff')
-                                    transforms[B_name].append([n for n in matchWith[obj] if type(n) == type(1)][0]) #copy angle value
-                                    break
-                                if 'angleSame' in matchWith[obj]:
-                                    transforms[B_name].append('angleSame')
-                                    break
-                        elif A_atts["angle"] == B_atts["angle"]:
-                            transforms[B_name].append("angleSame")
-                            weight += 4
+                        # if matchWith:
+                        #     for obj in matchWith.iterkeys():
+                        #         if 'angleDiff' in matchWith[obj]:
+                        #             transforms[B_name].append('angleDiff')
+                        #             transforms[B_name].append([n for n in matchWith[obj] if type(n) == type(1)][0]) #copy angle value
+                        #             break
+                        #         if 'angleSame' in matchWith[obj]:
+                        #             transforms[B_name].append('angleSame')
+                        #             break
+                        # elif A_atts["angle"] == B_atts["angle"]:
+                        #     transforms[B_name].append("angleSame")
+                        #     weight += 4
+                        transforms[B_name].append("ignoreAngle")
+                        weight +=4
                         
                     elif A_atts["angle"] == B_atts["angle"]:
                         transforms[B_name].append("angleSame")
                         weight += 4
                     else:
-                        transforms[B_name].append("angleDiff")
+                        #transforms[B_name].append("angleDiff")
                         transforms[B_name].append(abs(int(A_atts["angle"]) - int(B_atts["angle"])))
                         weight +=3
 
@@ -147,6 +149,45 @@ def getTransformations(AFrame,BFrame,matchWith):
               obj.name = newname 
         
         return bestTransforms
+
+
+def get2x2TransformRelations(trans1,trans2):
+    #make and return dictionary of relationships between vertical and horizontal transformations for each shape in a frame
+    transRels = {}
+    for key,trans1val in trans1.iteritems():#for each shape
+        transRels[key] = {}
+        trans1val = [str(s) for s in trans1val] #change angle int into str for easier compare
+        try:
+            trans2[key] = [str(s) for s in trans2[key]] #change angle int into str for easier compare
+        except KeyError:
+            trans2[key] = ['none']
+
+        for transform in trans1val:
+            if "shape" in transform: #match "shapeSame" or "shapeDiff"
+                if [transform] == [s for s in trans2[key] if "shape" in s]:
+                    transRels[key]["shape"] = "same"
+                else:
+                    transRels[key]["shape"] = "diff"
+
+            if "size" in transform: #match "sizeSame" or "sizeDiff"
+                if [transform] == [s for s in trans2[key] if "size" in s]:
+                    transRels[key]["size"] = "same"
+                else:
+                    transRels[key]["size"] = "diff"
+
+            if "fill" in transform: #match "fillSame" or "fillDiff"
+                if [transform] == [s for s in trans2[key] if "fill" in s]:
+                    transRels[key]["fill"] = "same"
+                else:
+                    transRels[key]["fill"] = "diff"
+
+            if "vertflip" in transform: #match "vertflipSame" or "vertflipDiff"
+                if [transform] == [s for s in trans2[key] if "vertflip" in s]:
+                    transRels[key]["vertflip"] = "same"
+                else:
+                    transRels[key]["vertflip"] = "diff"
+    print transRels
+    return transRels
 
 def getPositions(obj):
         #get relationships between objects
@@ -180,6 +221,32 @@ def compareTransformations(frame,compareWith,scores):
             
             transforms = frame.transformations[name]
             for compareWithVal,transformsval in zip(compareWith.values(),transforms.values()):
+                if "ignoreAngle" in compareWithVal:
+                    transformsval = [(str(r) if isinstance(r,int) else r) for r in transformsval ]
+                    transformsval = [r for r in transformsval if r[:5] != "angle"]
+                    transformsval.append("ignoreAngle")
+                elif "ignoreAngle" in transformsval:
+                    compareWithVal = [(str(r) if isinstance(r,int) else r) for r in compareWithVal ]
+                    compareWithVal = [r for r in compareWithVal if r[:5] != "angle"]
+                    compareWithVal.append("ignoreAngle")
+
                 scores[name] += len(set(compareWithVal).intersection(transformsval))
+                if scores[name] == len(compareWithVal) and scores[name] == len(transformsval):
+                    scores[name] += 2 #increase score for an exact match
+
+            if transforms == compareWith:
+                scores[name] += 5 #increase score for entire solution match
+        return scores
+
+def compare2x2Transformations(solutions,compareWith,scores):
+        possible = ["1", "2", "3", "4", "5", "6"]
+        for name in possible:
+            soln = solutions[int(name)-1]  
+            for compareVal,solnVal in zip(compareWith.values(),soln.values()):
+                scores[name] += len(set(compareVal).intersection(solnVal))
+                if scores[name] == len(compareVal) and scores[name] == len(solnVal):
+                    scores[name] += 2 #increase score for an exact match
+            if soln == compareWith:
+                scores[name] += 5 # increase score for entire solution match
 
         return scores
