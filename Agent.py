@@ -110,22 +110,15 @@ class Agent:
             BFrame.transformations["5"] = getTransformations(BFrame,fiveFrame,AtoC)
             BFrame.transformations["6"] = getTransformations(BFrame,sixFrame,AtoC)
         
-        if problem.getName() == "2x2 Basic Problem 07":
-            print AFrame.transformations
-            print ""
-            # print BFrame.transformations
-            # print ""
-            print CFrame.transformations
     
 
         #Choose answers C-># with similar transformations as A->B
         scores = {'1':0,'2':0,'3':0,'4':0,'5':0,'6':0} #naive 'delta' score
         
         scores = compareTransformations(CFrame,AFrame.transformations["B"],scores)
-        print scores
+        
         if problemType == "2x2": #Choose answers B-># with similar trans as A->C, score adds with above
             scores = compareTransformations(BFrame,AFrame.transformations["C"],scores)
-            print scores
         
         for name,score in scores.iteritems():
                 if score == max(scores.itervalues()):
@@ -158,7 +151,6 @@ class Agent:
                     if name in answer:
                         answer.remove(name)
 
-            print scores
             print "Answers after 2x2 transformations:", answer
 
 
@@ -223,11 +215,11 @@ class Agent:
 
 
 
-        correct = problem.checkAnswer(min(answer))
-        print "correct:", correct
-        print ""
-        return min(answer) if len(answer) == 1 else "0"
-        #return min(answer) if len(answer) > 0 else "0" #pick one randomly if multiple answers left. If there are no answers left choose 1 (shouldn't happen)
+        # correct = problem.checkAnswer(min(answer))
+        # print "correct:", correct
+        # print ""
+        
+        return min(answer) if len(answer) > 0 else "0" #pick one randomly if multiple answers left. If there are no answers left choose 1 (shouldn't happen)
 
 
 
