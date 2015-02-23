@@ -197,7 +197,7 @@ class Agent:
 
             print "Answers after positions:", answer
 
-        if len(answer) > 1 and problemType="2x2":
+        if len(answer) > 1 and problemType=="2x1":
             B_fr = FrameSimilarity(B)
             one_fr = FrameSimilarity(one)
             two_fr = FrameSimilarity(two)
