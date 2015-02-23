@@ -250,3 +250,53 @@ def compare2x2Transformations(solutions,compareWith,scores):
                 scores[name] += 5 # increase score for entire solution match
 
         return scores
+
+def FrameSimilarity(A):
+        #determine if all shapes in a frame share properties or not
+        A_Objs = A.getObjects()
+        frameDesc = []
+        shape = []
+        size = []
+        fill = []
+        rotation = []
+        for A_Obj in A_Objs:
+            A_atts = A_Obj.getAttributes()
+            for att in A_atts:
+                try:
+                    if att.getName() == "shape":
+                        shape.append(att.getValue())
+                except KeyError:
+                    pass
+                try:
+                    if att.getName() == "size":
+                        size.append(att.getValue())
+                except KeyError:
+                    pass
+                try:
+                    if att.getName() == "fill":
+                        fill.append(att.getValue())
+                except KeyError:
+                    pass
+                try:
+                    if att.getName() == "rotation":
+                        rotation.append(att.getValue())
+                except KeyError:
+                    pass
+        if len(set(shape)) <= 1:
+            frameDesc.append("sameShape")
+        else:
+            frameDesc.append("diffShape")
+        if len(set(size)) <= 1:
+            frameDesc.append("sameSize")
+        else:
+            frameDesc.append("diffSize")
+        if len(set(fill)) <= 1:
+            frameDesc.append("sameFill")
+        else:
+            frameDesc.append("diffFill")
+        if len(set(rotation)) <= 1:
+            frameDesc.append("sameRotation")
+        else:
+            frameDesc.append("diffRotation")
+        frameDesc.append(len(A_Objs)) #number of shapes
+        return frameDesc

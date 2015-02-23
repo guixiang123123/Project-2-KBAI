@@ -196,6 +196,33 @@ class Agent:
                     answer.remove(name)
 
             print "Answers after positions:", answer
+
+        if len(answer) > 1 and problemType="2x2":
+            B_fr = FrameSimilarity(B)
+            one_fr = FrameSimilarity(one)
+            two_fr = FrameSimilarity(two)
+            three_fr = FrameSimilarity(three)
+            four_fr = FrameSimilarity(four)
+            five_fr = FrameSimilarity(five)
+            six_fr = FrameSimilarity(six)
+
+            possible = {"1":one_fr, "2":two_fr, "3":three_fr, "4":four_fr, "5":five_fr, "6":six_fr}
+            #eliminate answers not in answer
+            for k in possible.keys(): 
+                if k not in answer:
+                    del possible[k]
+            #pick frame most similar to B
+            scores = {}
+            for name,frames in possible.iteritems():
+                scores[name] = len(set(B_fr).intersection(frames))
+            for name,score in scores.iteritems():
+                if score < max(scores.itervalues()):
+                    answer.remove(name)
+        print "Answers after frame comparisons:", answer
+        print ""
+
+
+
         correct = problem.checkAnswer(min(answer))
         print "correct:", correct
         print ""
