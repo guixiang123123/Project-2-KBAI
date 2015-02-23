@@ -186,7 +186,6 @@ def get2x2TransformRelations(trans1,trans2):
                     transRels[key]["vertflip"] = "same"
                 else:
                     transRels[key]["vertflip"] = "diff"
-    print transRels
     return transRels
 
 def getPositions(obj):
